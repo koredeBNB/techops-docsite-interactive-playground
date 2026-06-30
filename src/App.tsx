@@ -1,31 +1,58 @@
 import { useState } from 'react'
 import { getValidatorStatus } from './validatorStatus'
+import { getGasFeeStatus } from './gasFeeStatus'
 import './App.css'
 
-const PARAM = 'validator'
+const VALIDATOR_PARAM = 'validator'
+const NETWORK_PARAM = 'network'
+
+type Tab = 'validator' | 'gas'
 
 function initialValidatorId(): string {
-  const fromUrl = new URLSearchParams(window.location.search).get(PARAM)
+  const fromUrl = new URLSearchParams(window.location.search).get(VALIDATOR_PARAM)
   return fromUrl?.trim() || 'validator-1'
 }
 
+function initialNetwork(): string {
+  const fromUrl = new URLSearchParams(window.location.search).get(NETWORK_PARAM)
+  return fromUrl?.trim() || 'bnb-smart-chain'
+}
+
 function App() {
+  const [activeTab, setActiveTab] = useState<Tab>('validator')
   const [validatorId, setValidatorId] = useState(initialValidatorId)
-  const [submitted, setSubmitted] = useState(initialValidatorId)
+  const [submittedValidator, setSubmittedValidator] = useState(initialValidatorId)
+  const [network, setNetwork] = useState(initialNetwork)
+  const [submittedNetwork, setSubmittedNetwork] = useState(initialNetwork)
   const [copied, setCopied] = useState(false)
 
-  const id = submitted || 'validator-1'
-  const response = getValidatorStatus(id)
-  const snippet = `from mock_bsc_app.validators import get_validator_status\n\nstatus = get_validator_status(${JSON.stringify(id)})`
-  const responseJson = JSON.stringify(response, null, 2)
+  const validator = submittedValidator || 'validator-1'
+  const currentNetwork = submittedNetwork || 'bnb-smart-chain'
+  
+  const validatorResponse = getValidatorStatus(validator)
+  const gasResponse = getGasFeeStatus(currentNetwork)
+  
+  const validatorSnippet = `from mock_bsc_app.validators import get_validator_status\n\nstatus = get_validator_status(${JSON.stringify(validator)})`
+  const gasSnippet = `from mock_bsc_app.gas_fees import get_gas_fee_status\n\nstatus = get_gas_fee_status(${JSON.stringify(currentNetwork)})`
+  
+  const snippet = activeTab === 'validator' ? validatorSnippet : gasSnippet
+  const responseJson = activeTab === 'validator' ? JSON.stringify(validatorResponse, null, 2) : JSON.stringify(gasResponse, null, 2)
 
-  function run() {
+  function runValidator() {
     const next = validatorId.trim() || 'validator-1'
-    setSubmitted(next)
+    setSubmittedValidator(next)
     setCopied(false)
-    // Keep the validator id in the URL so MkDocs pages can deep-link a state.
     const url = new URL(window.location.href)
-    url.searchParams.set(PARAM, next)
+    url.searchParams.set(VALIDATOR_PARAM, next)
+    window.history.replaceState(null, '', url)
+  }
+
+  function runGas() {
+    const next = network.trim() || 'bnb-smart-chain'
+    setSubmittedNetwork(next)
+    setCopied(false)
+    const url = new URL(window.location.href)
+    url.searchParams.set(NETWORK_PARAM, next)
     window.history.replaceState(null, '', url)
   }
 
@@ -37,37 +64,70 @@ function App() {
   return (
     <main>
       <header>
-        <h1>Validator Status Playground</h1>
+        <h1>Mock BSC API Playground</h1>
         <p className="lede">
-          Try the <code>get_validator_status</code> API from the mock BSC app and
-          see the response that the{' '}
+          Try the mock BSC app APIs and see the responses that the{' '}
           <a
-            href="https://github.com/koredeBNB/mock-mkdocs-repo/blob/main/docs/validators.md"
+            href="https://github.com/koredeBNB/mock-mkdocs-repo/blob/main/docs/"
             target="_blank"
             rel="noreferrer"
           >
-            Validators guide
+            documentation
           </a>{' '}
-          documents.
+          describes.
         </p>
       </header>
 
-      <section className="card">
-        <label htmlFor="validator-id">Validator ID</label>
-        <div className="row">
-          <input
-            id="validator-id"
-            value={validatorId}
-            onChange={(e) => setValidatorId(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && run()}
-            placeholder="validator-1"
-            spellCheck={false}
-          />
-          <button type="button" onClick={run}>
-            Run request
-          </button>
-        </div>
-      </section>
+      <div className="tab-buttons">
+        <button 
+          className={`tab-button ${activeTab === 'validator' ? 'active' : ''}`}
+          onClick={() => setActiveTab('validator')}
+        >
+          Validator Status
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'gas' ? 'active' : ''}`}
+          onClick={() => setActiveTab('gas')}
+        >
+          Gas Fee Status
+        </button>
+      </div>
+
+      {activeTab === 'validator' ? (
+        <section className="card">
+          <label htmlFor="validator-id">Validator ID</label>
+          <div className="row">
+            <input
+              id="validator-id"
+              value={validatorId}
+              onChange={(e) => setValidatorId(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runValidator()}
+              placeholder="validator-1"
+              spellCheck={false}
+            />
+            <button type="button" onClick={runValidator}>
+              Run request
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="card">
+          <label htmlFor="network">Network</label>
+          <div className="row">
+            <input
+              id="network"
+              value={network}
+              onChange={(e) => setNetwork(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runGas()}
+              placeholder="bnb-smart-chain"
+              spellCheck={false}
+            />
+            <button type="button" onClick={runGas}>
+              Run request
+            </button>
+          </div>
+        </section>
+      )}
 
       <section className="card">
         <div className="card-head">
@@ -89,7 +149,7 @@ function App() {
       </section>
 
       <footer>
-        Each field above maps to a bullet in the Validators guide. When a field
+        Each field above maps to a bullet in the documentation. When a field
         is added or changed in the source API, the docs (and this playground)
         should be updated to match.
       </footer>
