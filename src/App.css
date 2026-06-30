@@ -16,6 +16,35 @@ header {
   font-size: 16px;
 }
 
+.tab-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.tab {
+  font: 500 15px var(--sans);
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: var(--code-bg);
+}
+
+.tab.active {
+  border-color: var(--border);
+  border-bottom-color: var(--bg);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
 .card {
   border: 1px solid var(--border);
   border-radius: 10px;
