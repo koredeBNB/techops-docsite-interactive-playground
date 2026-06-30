@@ -27,5 +27,5 @@ state:
 
 Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the app and
 publishes `dist/` to GitHub Pages at
-`https://bnb-chain.github.io/techops-docsite-interactive-playground/`.
+`https://koredebnb.github.io/techops-docsite-interactive-playground/`.
 The Vite `base` path in `vite.config.ts` must match the repository name.
