@@ -8,15 +8,17 @@ export type GasFeeStatus = {
   estimated_total_fee_gwei: number
   congestion_level: string
   sample_block: number
+  fee_trend: string
 }
 
 export function getGasFeeStatus(network: string): GasFeeStatus {
   return {
     network: network,
-    base_fee_gwei: 3.2,
-    priority_fee_gwei: 0.8,
-    estimated_total_fee_gwei: 4.0,
-    congestion_level: "low",
-    sample_block: 39124801,
+    base_fee_gwei: 3.5,
+    priority_fee_gwei: 1.1,
+    estimated_total_fee_gwei: 4.6,
+    congestion_level: "medium",
+    sample_block: 39126000,
+    fee_trend: "rising",
   }
 }
