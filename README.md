@@ -1,9 +1,10 @@
 # TechOps Docsite Interactive Playground
 
 A small static React + Vite app that lets readers try the mock BSC
-`get_validator_status` API and see the response documented in the Validators
-guide. The response is simulated client-side, mirroring
-`mock-bsc-app/src/mock_bsc_app/validators.py` — there is no backend.
+`get_validator_status`, `get_gas_fee_status`, `get_block_sync_status`, and
+`get_network_health` APIs and see the responses documented in the respective
+guides. The responses are simulated client-side, mirroring the modules in
+`mock-bsc-app/src/mock_bsc_app/` — there is no backend.
 
 ## Develop
 
@@ -16,11 +17,12 @@ npm run preview
 
 ## Deep links
 
-The selected validator id is stored in the URL, so docs can link to a specific
-state:
+The selected validator id or network is stored in the URL, so docs can link to
+a specific state:
 
 ```
 .../techops-docsite-interactive-playground/?validator=validator-1
+.../techops-docsite-interactive-playground/?network=bnb-smart-chain
 ```
 
 ## Deploy
