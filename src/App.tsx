@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { getValidatorStatus } from './validatorStatus'
 import { getGasFeeStatus } from './gasFeeStatus'
 import { getBlockSyncStatus } from './blockSyncStatus'
+import { getNetworkHealth } from './networkHealthStatus'
 import './App.css'
 
 const VALIDATOR_PARAM = 'validator'
 const NETWORK_PARAM = 'network'
 
-type Tab = 'validator' | 'gas' | 'blocksync'
+type Tab = 'validator' | 'gas' | 'blocksync' | 'networkhealth'
 
 function initialValidatorId(): string {
   const fromUrl = new URLSearchParams(window.location.search).get(VALIDATOR_PARAM)
@@ -27,26 +28,40 @@ function App() {
   const [submittedNetwork, setSubmittedNetwork] = useState(initialNetwork)
   const [blockSyncNetwork, setBlockSyncNetwork] = useState(initialNetwork)
   const [submittedBlockSyncNetwork, setSubmittedBlockSyncNetwork] = useState(initialNetwork)
+  const [networkHealthNetwork, setNetworkHealthNetwork] = useState(initialNetwork)
+  const [submittedNetworkHealthNetwork, setSubmittedNetworkHealthNetwork] = useState(initialNetwork)
   const [copied, setCopied] = useState(false)
 
   const validator = submittedValidator || 'validator-1'
   const currentNetwork = submittedNetwork || 'bnb-smart-chain'
   const currentBlockSyncNetwork = submittedBlockSyncNetwork || 'bnb-smart-chain'
+  const currentNetworkHealthNetwork = submittedNetworkHealthNetwork || 'bnb-smart-chain'
 
   const validatorResponse = getValidatorStatus(validator)
   const gasResponse = getGasFeeStatus(currentNetwork)
   const blockSyncResponse = getBlockSyncStatus(currentBlockSyncNetwork)
+  const networkHealthResponse = getNetworkHealth(currentNetworkHealthNetwork)
 
   const validatorSnippet = `from mock_bsc_app.validators import get_validator_status\n\nstatus = get_validator_status(${JSON.stringify(validator)})`
   const gasSnippet = `from mock_bsc_app.gas_fees import get_gas_fee_status\n\nstatus = get_gas_fee_status(${JSON.stringify(currentNetwork)})`
   const blockSyncSnippet = `from mock_bsc_app.block_sync import get_block_sync_status\n\nstatus = get_block_sync_status(${JSON.stringify(currentBlockSyncNetwork)})`
+  const networkHealthSnippet = `from mock_bsc_app.network_health import get_network_health\n\nhealth = get_network_health(${JSON.stringify(currentNetworkHealthNetwork)})`
 
-  const snippet = activeTab === 'validator' ? validatorSnippet : activeTab === 'gas' ? gasSnippet : blockSyncSnippet
+  const snippet = activeTab === 'validator'
+    ? validatorSnippet
+    : activeTab === 'gas'
+      ? gasSnippet
+      : activeTab === 'blocksync'
+        ? blockSyncSnippet
+        : networkHealthSnippet
+
   const responseJson = activeTab === 'validator'
     ? JSON.stringify(validatorResponse, null, 2)
     : activeTab === 'gas'
       ? JSON.stringify(gasResponse, null, 2)
-      : JSON.stringify(blockSyncResponse, null, 2)
+      : activeTab === 'blocksync'
+        ? JSON.stringify(blockSyncResponse, null, 2)
+        : JSON.stringify(networkHealthResponse, null, 2)
 
   function runValidator() {
     const next = validatorId.trim() || 'validator-1'
@@ -69,6 +84,12 @@ function App() {
   function runBlockSync() {
     const next = blockSyncNetwork.trim() || 'bnb-smart-chain'
     setSubmittedBlockSyncNetwork(next)
+    setCopied(false)
+  }
+
+  function runNetworkHealth() {
+    const next = networkHealthNetwork.trim() || 'bnb-smart-chain'
+    setSubmittedNetworkHealthNetwork(next)
     setCopied(false)
   }
 
@@ -113,6 +134,12 @@ function App() {
         >
           Block Sync Status
         </button>
+        <button
+          className={`tab-button ${activeTab === 'networkhealth' ? 'active' : ''}`}
+          onClick={() => setActiveTab('networkhealth')}
+        >
+          Network Health
+        </button>
       </div>
 
       {activeTab === 'validator' ? (
@@ -149,7 +176,7 @@ function App() {
             </button>
           </div>
         </section>
-      ) : (
+      ) : activeTab === 'blocksync' ? (
         <section className="card">
           <label htmlFor="blocksync-network">Network</label>
           <div className="row">
@@ -162,6 +189,23 @@ function App() {
               spellCheck={false}
             />
             <button type="button" onClick={runBlockSync}>
+              Run request
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="card">
+          <label htmlFor="networkhealth-network">Network</label>
+          <div className="row">
+            <input
+              id="networkhealth-network"
+              value={networkHealthNetwork}
+              onChange={(e) => setNetworkHealthNetwork(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runNetworkHealth()}
+              placeholder="bnb-smart-chain"
+              spellCheck={false}
+            />
+            <button type="button" onClick={runNetworkHealth}>
               Run request
             </button>
           </div>
