@@ -4,6 +4,8 @@
 export type BlockSyncStatus = {
   network: string
   latest_block: number
+  safe_block: number
+  finalized_block: number
   sync_lag_blocks: number
   is_syncing: boolean
   sync_mode: string
@@ -13,7 +15,9 @@ export type BlockSyncStatus = {
 export function getBlockSyncStatus(network: string): BlockSyncStatus {
   return {
     network: network,
-    latest_block: 39124800,
+    latest_block: 39126000,
+    safe_block: 39125920,
+    finalized_block: 39125810,
     sync_lag_blocks: 80,
     is_syncing: false,
     sync_mode: 'full',
